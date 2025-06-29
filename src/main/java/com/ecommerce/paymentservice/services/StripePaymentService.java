@@ -15,6 +15,8 @@ import org.springframework.stereotype.Service;
 public class StripePaymentService implements IPaymentService {
     @Value("${stripe.api.key}")
     private String stripeApiKey;
+    @Value("${stripe.redirect.url}")
+    private String redirectUrl;
 
     @Override
     public String generatePaymentLink(String orderId) throws StripeException {
@@ -23,16 +25,14 @@ public class StripePaymentService implements IPaymentService {
 
         ProductCreateParams productCreateParams =
                 ProductCreateParams.builder()
-                        .setName("T-shirt")
-                        .build();
+                        .setName("T-Shirt").build();
 
         Product product = Product.create(productCreateParams);
-
 
         PriceCreateParams priceCreateParams =
                 PriceCreateParams.builder()
                         .setCurrency("inr")
-                        .setUnitAmount(1000L)
+                        .setUnitAmount(1000L) //10.00
                         .setProduct(product.getId())
                         .build();
 
@@ -43,13 +43,23 @@ public class StripePaymentService implements IPaymentService {
                         .addLineItem(
                                 PaymentLinkCreateParams.LineItem.builder()
                                         .setPrice(price.getId())
-                                        .setQuantity(10L)
+                                        .setQuantity(1L)
+                                        .build()
+                        )
+                        .setAfterCompletion(
+                                PaymentLinkCreateParams.AfterCompletion.builder()
+                                        .setType(PaymentLinkCreateParams.AfterCompletion.Type.REDIRECT)
+                                        .setRedirect(
+                                                PaymentLinkCreateParams.AfterCompletion.Redirect.builder()
+                                                        .setUrl(redirectUrl)
+                                                        .build()
+                                        )
                                         .build()
                         )
                         .build();
 
         PaymentLink paymentLink = PaymentLink.create(paymentLinkCreateParams);
 
-        return paymentLink.toString();
+        return paymentLink.getUrl();
     }
 }
