@@ -31,7 +31,7 @@ public class StripePaymentService implements IPaymentService {
 
         PriceCreateParams priceCreateParams =
                 PriceCreateParams.builder()
-                        .setCurrency("inr")
+                        .setCurrency("GBP")
                         .setUnitAmount(1000L) //10.00
                         .setProduct(product.getId())
                         .build();
